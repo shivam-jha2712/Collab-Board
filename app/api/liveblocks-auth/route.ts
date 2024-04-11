@@ -7,6 +7,8 @@ import { api } from "@/convex/_generated/api";
 // Instance of my Database in my route handler
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
+// Safetly added the key via env.local
+
 // Instance of my Liveblocks
 const liveblocks = new Liveblocks({
   secret:
