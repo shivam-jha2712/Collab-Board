@@ -8,6 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { ModalProvider } from "@/providers/modal-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 const inter = DM_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -34,6 +36,7 @@ export default function RootLayout({
             <Toaster />
             <ModalProvider />
             {children}
+            <SpeedInsights/> 
           </ConvexClientProvider>
         </ThemeProvider>
       </body>
