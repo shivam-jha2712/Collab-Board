@@ -31,6 +31,7 @@ import { DrawBoard } from "./draw-board";
 import {
   connectionIdToColor,
   findIntersectingLayersWithReactangle,
+  penPointsToPathLayer,
   pointerEventToCanvasPoint,
   resizeBounds,
 } from "@/lib/utils";
@@ -40,6 +41,7 @@ import { SelectionBox } from "./selection-box";
 import { SelectionTools } from "./selection-tools";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Hint } from "@/components/hint";
+import { cursorTo } from "readline";
 
 const MAX_LAYERS = 100;
 
@@ -65,9 +67,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
   // Results in black color in normal mode  pencil color
   const [lastUsedColor, setLastUsedColor] = useState<Color>({
-    r: 0,
-    g: 0,
-    b: 0,
+    r: 255,
+    g: 255,
+    b: 255,
   });
 
   // THis is to insert layers within the board itself
@@ -185,6 +187,82 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     }
   }, []);
 
+
+
+// This is for continueDrawing Functytion
+const continueDrawing = useMutation((
+  {self, setMyPresence},
+  point: Point,
+  e: React.PointerEvent,
+) => {
+  const {pencilDraft} = self.presence;
+
+
+  if(canvasState.mode !== CanvasMode.Pencil || e.buttons !== 1 || pencilDraft == null)
+  {
+    return;
+  }
+
+  setMyPresence({
+    cursor: point,
+    pencilDraft:
+      pencilDraft.length === 1 &&
+      pencilDraft[0][0] === point.x &&
+      pencilDraft[0][1] === point.y 
+      ? pencilDraft
+      : [...pencilDraft, [point.x, point.y, e.pressure]]
+
+  });
+}, [canvasState.mode]);
+
+// This is for the inserting of the drawn path by the pointer from starting till it has been up
+const insertPath = useMutation((
+  {storage, self, setMyPresence},
+  
+) => {
+const liveLayers = storage.get("layers");
+const {pencilDraft} = self.presence;
+
+if(
+  pencilDraft == null ||
+  pencilDraft.length < 2 ||
+  liveLayers.size >= MAX_LAYERS
+)
+{
+  setMyPresence({pencilDraft: null});
+  return;
+}
+
+const id = nanoid();
+liveLayers.set(
+  id, 
+  new LiveObject(penPointsToPathLayer(
+    pencilDraft,
+    lastUsedColor,
+  )),
+);
+
+const liveLayersIds = storage.get("layerIds");
+liveLayersIds.push(id);
+
+setMyPresence({pencilDraft: null});
+setCanvasState({mode: CanvasMode.Pencil});
+
+
+}, [lastUsedColor]);
+
+
+  // function for Starting the drawing
+  const startDrawing = useMutation(
+    ({ setMyPresence }, point: Point, pressure: number) => {
+      setMyPresence({
+        pencilDraft: [[point.x, point.y, pressure]],
+        penColor: lastUsedColor,
+      });
+    },
+    [lastUsedColor]
+  );
+
   // Function for resizing the layer
   const resizeSelectedLayer = useMutation(
     ({ storage, self }, point: Point) => {
@@ -256,9 +334,16 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         resizeSelectedLayer(current);
       }
 
+
+      // This is working for pencil drawing while moving
+      else if(canvasState.mode === CanvasMode.Pencil)
+      {
+        continueDrawing(current, e);
+      }
+
       setMyPresence({ cursor: current });
     },
-    [canvasState, resizeSelectedLayer, camera, translateSelectedLayers]
+    [canvasState, resizeSelectedLayer, camera, translateSelectedLayers, continueDrawing, startMultiSelection, updateSelectionNet]
   );
 
   // This is to deselect the layer once we click outside of the given layer
@@ -271,9 +356,15 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       }
 
       // TODO: Add case for drawing
+
+      if (canvasState.mode === CanvasMode.Pencil) {
+        startDrawing(point, e.pressure);
+        return;
+      }
+
       setCanvasState({ origin: point, mode: CanvasMode.Pressing });
     },
-    [canvasState.mode, camera, setCanvasState]
+    [canvasState.mode, camera, setCanvasState, startDrawing]
   );
 
   // This is to make sure when the cursor is out of Canvas it is no longer shown there
@@ -300,6 +391,11 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         });
       }
 
+      // This is regarding the pencil based drawing
+      else if(canvasState.mode === CanvasMode.Pencil){
+        insertPath();
+      }
+
       // This is for the insertion of layers when pointer is clicked up for once
       else if (canvasState.mode === CanvasMode.Inserting) {
         insertLayer(canvasState.layerType, point);
@@ -311,7 +407,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       history.resume();
     },
-    [camera, canvasState, history, insertLayer, unSelectLayers]
+    [setCanvasState,camera, canvasState, history, insertLayer, unSelectLayers, insertPath]
   );
 
   const selections = useOthersMapped((other) => other.presence.selection);
@@ -369,11 +465,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         undo={history.undo}
         redo={history.redo}
       />
-      <Hint 
-      label="Switch Theme">
-      <div className="fixed z-10 bottom-2 left-2 flex items-center justify-center">
-        <ModeToggle />
-      </div>
+      <Hint label="Switch Theme">
+        <div className="fixed z-10 bottom-2 left-2 flex items-center justify-center">
+          <ModeToggle />
+        </div>
       </Hint>
 
       <DrawBoard />
