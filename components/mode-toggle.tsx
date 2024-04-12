@@ -1,19 +1,33 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
+import * as React from "react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import { useplannerTheme } from "@/store/use-theme-modal";
+
 
 export function ModeToggle() {
-  const { setTheme } = useTheme()
+  const { setTheme } = useTheme();
+
+  const setLightTheme = useplannerTheme((state: any) => state.setLightTheme);
+  const setDarkTheme = useplannerTheme((state: any) => state.setDarkTheme);
+
+  const handleThemeDark = (themeMain: string) => {
+    setDarkTheme();
+    setTheme(themeMain);
+  };
+  const handleThemeLight = (themeMain: string) => {
+    setLightTheme();
+    setTheme(themeMain);
+  };
 
   return (
     <DropdownMenu>
@@ -25,16 +39,16 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => handleThemeDark("dark")}>
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
+        <DropdownMenuItem onClick={() => handleThemeLight("light")}>
+          Light
         </DropdownMenuItem>
+        {/* <DropdownMenuItem onClick={() => setTheme("system")}>
+          System
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

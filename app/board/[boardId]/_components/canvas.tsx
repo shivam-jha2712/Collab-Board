@@ -48,7 +48,7 @@ import { Path } from "./layer-path";
 import { useDisableScrollBounce } from "@/hooks/use-disable-scroll-bounce";
 import { useDeleteLayers } from "@/hooks/use-delete-layers";
 
-const MAX_LAYERS = 100;
+const MAX_LAYERS = 1000;
 
 interface CanvasProps {
   boardId: string;
@@ -194,7 +194,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     }
   }, []);
 
-  // This is for continueDrawing Functytion
+  // This is for continueDrawing Function
   const continueDrawing = useMutation(
     ({ self, setMyPresence }, point: Point, e: React.PointerEvent) => {
       const { pencilDraft } = self.presence;
