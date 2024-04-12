@@ -11,7 +11,10 @@ import { useSearchParams } from "next/navigation"; // Importing the useSearchPar
 import { cn } from "@/lib/utils"; // Importing utility function 'cn' for conditional classNames
 import { Button } from "@/components/ui/button"; // Importing the Button component from a custom UI library
 
-import { dark } from '@clerk/themes';
+import { dark } from "@clerk/themes";
+import { useConvex } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useEffect, useState } from "react";
 
 // Defining font styles for the sidebar using the Poppins font with specific weights and subsets
 const font = Poppins({
@@ -27,6 +30,22 @@ export const OrgSidebar = () => {
   // Accessing search parameters from the URL using the useSearchParams hook
   const searchParams = useSearchParams();
   const favorites = searchParams.get("favorites"); // Extracting the 'favorites' parameter from the URL
+
+  // This is for getting the boards from the convex
+  const convex = useConvex();
+
+  const [totalFiles, setTotalFiles] = useState<Number>();
+
+  // useEffect(() => {
+  //   activeTeam&&getFiles();
+  // }, [activeTeam])
+
+  // This is for upgrade is needed or not - Board Limit
+  // const getFiles = async()=> {
+  //   const result = await convex.query(api.board.getFiles,{orgId:activeTeam?._id});
+  //   console.log(result);
+  //   setTotalFiles(result?.length)
+  // }
 
   return (
     // Sidebar container with fixed width and vertical layout
@@ -45,33 +64,32 @@ export const OrgSidebar = () => {
         </div>
       </Link>
       {/* Organization switcher component */}
-        <OrganizationSwitcher
-          hidePersonal // Hides personal organizations from the switcher
-          // Custom appearance styles for the organization switcher
-          appearance={{
-            baseTheme: dark,
-            elements: {
-              rootBox: {
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-                borderRadius: "8px",
-                backgroundColor: "#3b3a39", 
-                // color: "dark" ? "white" : "black",
-              },
-              organizationSwitcherTrigger: {
-                padding: "6px",
-                width: "100%",
-                borderRadius: "8px",
-                border: "1px solid #E5E7EB",
-                justifyContent: "space-between",
-                // backgroundColor: "black",
-                
-              },
+      <OrganizationSwitcher
+        hidePersonal // Hides personal organizations from the switcher
+        // Custom appearance styles for the organization switcher
+        appearance={{
+          baseTheme: dark,
+          elements: {
+            rootBox: {
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              borderRadius: "8px",
+              backgroundColor: "#3b3a39",
+              // color: "dark" ? "white" : "black",
             },
-          }}
-        />
+            organizationSwitcherTrigger: {
+              padding: "6px",
+              width: "100%",
+              borderRadius: "8px",
+              border: "1px solid #E5E7EB",
+              justifyContent: "space-between",
+              // backgroundColor: "black",
+            },
+          },
+        }}
+      />
       {/* Navigation buttons for team and favorite boards */}
       <div className="space-y-1 w-full">
         {/* Button for team boards */}
@@ -106,6 +124,18 @@ export const OrgSidebar = () => {
           </Link>
         </Button>
       </div>
+
+      {/* Progress Bar  */}
+      <div className="h-4 w-full bg-gray-200 rounded-full mt-5">
+        <div className={`h-4 w-[40%]  bg-blue-600 rounded-full`}></div>
+      </div>
+
+      <h2 className="text-[12px] mt-3 color:dark-invert">
+        <strong>1</strong> out of <strong>2</strong> files used
+      </h2>
+      <h2 className="text-[12px] mt-1 color:dark-invert">
+        Upgrade your plan for unlimited access.
+      </h2>
     </div>
   );
 };

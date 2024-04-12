@@ -17,6 +17,9 @@ const images = [
   "/placeholders/10.svg",
 ];
 
+
+const FREE_PLAN_LIMIT = 5;
+
 /**
  * 1.  create mutation to create a new board.
  * It takes orgId and title as arguments and handles the creation of a new board.
@@ -216,3 +219,16 @@ export const get  = query({
     return board;
   },
 });
+
+
+// This is to check if upgrade is needed 
+export const getFiles = query({
+  args: {  orgId: v.string() },
+  handler: async (ctx, args) => {
+    const result = ctx.db.query('boards')
+    .filter(q=>q.eq(q.field('orgId'), args.orgId))
+    .collect();
+
+    return result;
+  }
+})

@@ -114,7 +114,7 @@ export const Toolbar = ({
           }
           isActive={canvasState.mode === CanvasMode.Pencil }
         />
-        {/* Same with the eraser as well */}
+        {/* TODO: Setup eraser */}
         <ToolButton
           label="Eraser"
           icon={Eraser}
