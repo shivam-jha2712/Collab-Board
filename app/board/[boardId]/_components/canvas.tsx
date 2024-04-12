@@ -53,7 +53,6 @@ interface CanvasProps {
 }
 
 export const Canvas = ({ boardId }: CanvasProps) => {
-
   // This is for the Layers that are to be put in
   const layerIds = useStorage((root) => root.layerIds);
 
@@ -62,14 +61,13 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   // For my pencil movement to be seen
   const pencilDraft = useSelf((me) => me.presence.pencilDraft);
 
-
   // This is for the Canvas State inside the board and to justify if some data is present or not
   const [canvasState, setCanvasState] = useState<CanvasState>({
     mode: CanvasMode.None,
   });
 
   // Setting up the camera
-  const [camera, setCamera] = useState<Camera>({ x: 0, y: 0 });
+  const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, scale: 1 });
 
   // Results in black color in normal mode  pencil color
   const [lastUsedColor, setLastUsedColor] = useState<Color>({
@@ -193,70 +191,61 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     }
   }, []);
 
+  // This is for continueDrawing Functytion
+  const continueDrawing = useMutation(
+    ({ self, setMyPresence }, point: Point, e: React.PointerEvent) => {
+      const { pencilDraft } = self.presence;
 
+      if (
+        canvasState.mode !== CanvasMode.Pencil ||
+        e.buttons !== 1 ||
+        pencilDraft == null
+      ) {
+        return;
+      }
 
-// This is for continueDrawing Functytion
-const continueDrawing = useMutation((
-  {self, setMyPresence},
-  point: Point,
-  e: React.PointerEvent,
-) => {
-  const {pencilDraft} = self.presence;
+      setMyPresence({
+        cursor: point,
+        pencilDraft:
+          pencilDraft.length === 1 &&
+          pencilDraft[0][0] === point.x &&
+          pencilDraft[0][1] === point.y
+            ? pencilDraft
+            : [...pencilDraft, [point.x, point.y, e.pressure]],
+      });
+    },
+    [canvasState.mode]
+  );
 
+  // This is for the inserting of the drawn path by the pointer from starting till it has been up
+  const insertPath = useMutation(
+    ({ storage, self, setMyPresence }) => {
+      const liveLayers = storage.get("layers");
+      const { pencilDraft } = self.presence;
 
-  if(canvasState.mode !== CanvasMode.Pencil || e.buttons !== 1 || pencilDraft == null)
-  {
-    return;
-  }
+      if (
+        pencilDraft == null ||
+        pencilDraft.length < 2 ||
+        liveLayers.size >= MAX_LAYERS
+      ) {
+        setMyPresence({ pencilDraft: null });
+        return;
+      }
 
-  setMyPresence({
-    cursor: point,
-    pencilDraft:
-      pencilDraft.length === 1 &&
-      pencilDraft[0][0] === point.x &&
-      pencilDraft[0][1] === point.y 
-      ? pencilDraft
-      : [...pencilDraft, [point.x, point.y, e.pressure]]
+      const id = nanoid();
+      liveLayers.set(
+        id,
+        new LiveObject(penPointsToPathLayer(pencilDraft, lastUsedColor))
+      );
 
-  });
-}, [canvasState.mode]);
+      const liveLayersIds = storage.get("layerIds");
+      liveLayersIds.push(id);
 
-// This is for the inserting of the drawn path by the pointer from starting till it has been up
-const insertPath = useMutation((
-  {storage, self, setMyPresence},
-  
-) => {
-const liveLayers = storage.get("layers");
-const {pencilDraft} = self.presence;
-
-if(
-  pencilDraft == null ||
-  pencilDraft.length < 2 ||
-  liveLayers.size >= MAX_LAYERS
-)
-{
-  setMyPresence({pencilDraft: null});
-  return;
-}
-
-const id = nanoid();
-liveLayers.set(
-  id, 
-  new LiveObject(penPointsToPathLayer(
-    pencilDraft,
-    lastUsedColor,
-  )),
-);
-
-const liveLayersIds = storage.get("layerIds");
-liveLayersIds.push(id);
-
-setMyPresence({pencilDraft: null});
-setCanvasState({mode: CanvasMode.Pencil});
-
-
-}, [lastUsedColor]);
-
+      setMyPresence({ pencilDraft: null });
+      setCanvasState({ mode: CanvasMode.Pencil });
+    },
+    [lastUsedColor]
+  );
 
   // function for Starting the drawing
   const startDrawing = useMutation(
@@ -306,14 +295,33 @@ setCanvasState({mode: CanvasMode.Pencil});
   );
 
   // Here what we are doing is panning the camera based on the wheel delta
-  const onWheel = useCallback((e: React.WheelEvent) => {
-    setCamera((camera) => ({
-      x: camera.x - e.deltaX,
-      y: camera.y - e.deltaY,
-    }));
 
-    // TODO: Zoom in and Out and complee canvas visibility as well and this will also be a onWheelEvent itself
-  }, []);
+  const onWheel = useCallback(
+    (e: React.WheelEvent) => {
+      // Prevent default behavior (scrolling)
+      e.preventDefault();
+
+      // Check if the ctrl key is pressed (indicating zoom)
+      if (e.ctrlKey) {
+        // Calculate the new scale factor based on wheel movement
+        const newScale = camera.scale * (e.deltaY > 0 ? 0.9 : 1.1);
+
+        // Update the camera state with the new scale
+        setCamera((prevCamera) => ({
+          ...prevCamera,
+          scale: newScale,
+        }));
+      } else {
+        // Handle panning by adjusting camera position
+        setCamera((prevCamera) => ({
+          x: prevCamera.x - e.deltaX,
+          y: prevCamera.y - e.deltaY,
+          scale: 1,
+        }));
+      }
+    },
+    [camera.scale] // Include scale dependency
+  );
 
   // This is to detremine the movement of thhe cursor w.r.t to the intial presence and it will also be used for resizing as well
   const onPointerMove = useMutation(
@@ -340,16 +348,22 @@ setCanvasState({mode: CanvasMode.Pencil});
         resizeSelectedLayer(current);
       }
 
-
       // This is working for pencil drawing while moving
-      else if(canvasState.mode === CanvasMode.Pencil)
-      {
+      else if (canvasState.mode === CanvasMode.Pencil) {
         continueDrawing(current, e);
       }
 
       setMyPresence({ cursor: current });
     },
-    [canvasState, resizeSelectedLayer, camera, translateSelectedLayers, continueDrawing, startMultiSelection, updateSelectionNet]
+    [
+      canvasState,
+      resizeSelectedLayer,
+      camera,
+      translateSelectedLayers,
+      continueDrawing,
+      startMultiSelection,
+      updateSelectionNet,
+    ]
   );
 
   // This is to deselect the layer once we click outside of the given layer
@@ -398,7 +412,7 @@ setCanvasState({mode: CanvasMode.Pencil});
       }
 
       // This is regarding the pencil based drawing
-      else if(canvasState.mode === CanvasMode.Pencil){
+      else if (canvasState.mode === CanvasMode.Pencil) {
         insertPath();
       }
 
@@ -413,7 +427,15 @@ setCanvasState({mode: CanvasMode.Pencil});
 
       history.resume();
     },
-    [setCanvasState,camera, canvasState, history, insertLayer, unSelectLayers, insertPath]
+    [
+      setCanvasState,
+      camera,
+      canvasState,
+      history,
+      insertLayer,
+      unSelectLayers,
+      insertPath,
+    ]
   );
 
   const selections = useOthersMapped((other) => other.presence.selection);
@@ -495,7 +517,10 @@ setCanvasState({mode: CanvasMode.Pencil});
         {/* Also the svg and g are going to have functionality of camera positioning on scroll for later */}
         <g
           style={{
-            transform: `translate(${camera.x}px, ${camera.y}px)`,
+            transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.scale})`,
+            width: "100vw",
+            height: "100vh",
+            overflow: "hidden",
           }}
         >
           {layerIds.map((layerId) => (
@@ -519,12 +544,12 @@ setCanvasState({mode: CanvasMode.Pencil});
               />
             )}
           <CursorPresence />
-          {pencilDraft != null && pencilDraft.length > 0 &&(
+          {pencilDraft != null && pencilDraft.length > 0 && (
             <Path
-            points= {pencilDraft}
-            fill={colorToCss(lastUsedColor)}
-            x={0}
-            y={0}
+              points={pencilDraft}
+              fill={colorToCss(lastUsedColor)}
+              x={0}
+              y={0}
             />
           )}
         </g>

@@ -125,7 +125,7 @@ export function penPointsToPathLayer(
   points: number[][],
   color: Color
 ): PathLayer {
-  if (points.length < 1) {
+  if (points.length < 0) {
     throw new Error("Cannot transform points with less than 2 points");
   }
 

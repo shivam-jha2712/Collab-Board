@@ -1,3 +1,42 @@
 The complete Work flow has been documented in the given notion file.
 
 https://www.notion.so/Collab-Board-Project-bc95b3697f7e4ba2988217e87036ab68
+
+
+  const onWheel = useCallback(
+    (e: React.WheelEvent) => {
+      // Prevent default behavior (scrolling)
+      e.preventDefault();
+
+      // Check if the ctrl key is pressed (indicating zoom)
+      if (e.ctrlKey) {
+        // Calculate the new scale factor based on wheel movement
+        const newScale = camera.scale * (e.deltaY > 0 ? 0.9 : 1.1);
+
+        // Update the camera state with the new scale
+        setCamera((prevCamera) => ({
+          ...prevCamera,
+          scale: newScale,
+        }));
+      } else {
+        // Handle panning by adjusting camera position
+        setCamera((prevCamera) => ({
+          x: prevCamera.x - e.deltaX,
+          y: prevCamera.y - e.deltaY,
+          scale: 1,
+        }));
+      }
+    },
+    [camera.scale] // Include scale dependency
+  );
+
+
+
+// just in case gadbada jao toh utha ke chep dena sidha 
+
+    const onWheel = useCallback((e: React.WheelEvent) => {
+    setCamera((camera) => ({
+      x: camera.x - e.deltaX,
+      y: camera.y - e.deltaY,
+    }));
+    }
