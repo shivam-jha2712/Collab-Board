@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import {
   Camera,
   CanvasMode,
@@ -45,6 +45,8 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { Hint } from "@/components/hint";
 import { cursorTo } from "readline";
 import { Path } from "./layer-path";
+import { useDisableScrollBounce } from "@/hooks/use-disable-scroll-bounce";
+import { useDeleteLayers } from "@/hooks/use-delete-layers";
 
 const MAX_LAYERS = 100;
 
@@ -116,6 +118,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const history = useHistory();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
+  useDisableScrollBounce();
 
   // Function for Translation/Moving the Layer
 
@@ -479,6 +482,49 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
     return layerIdsToColorSelection;
   }, [selections]);
+
+  // This is for enabling keyboard shortcuts for our project
+  const deleteLayers = useDeleteLayers();
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      switch (e.key) {
+        case "Backspace":
+          deleteLayers();
+          break;
+        case "Delete":
+          deleteLayers();
+          break;
+
+        case "z": {
+          if (e.ctrlKey || e.metaKey) {
+            if (e.shiftKey) {
+              history.redo();
+            } else {
+              history.undo();
+            }
+            break;
+          }
+        }
+        case "y": {
+          if (e.ctrlKey || e.metaKey) {
+            if (e.shiftKey) {
+              history.undo();
+            } else {
+              history.redo();
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [deleteLayers, history]);
 
   return (
     // Board Color : TODO : Create dots in the background as grid
