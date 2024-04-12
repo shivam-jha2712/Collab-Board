@@ -26,6 +26,7 @@ export const CursorPresence = memo(() => {
     return(
         <>
         {/* TODO: DRaft Pencil to identify moment of other user */}
+        
         <Cursors/>
         </>
     );

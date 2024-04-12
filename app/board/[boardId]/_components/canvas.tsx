@@ -24,11 +24,13 @@ import {
   useMutation,
   useStorage,
   useOthersMapped,
+  useSelf,
   // useMutation is a hook that can be used to broadcast or stream changes to the group of people connected inside of the liveblocks room
 } from "@/liveblocks.config";
 import { CursorPresence } from "./cursors-presence";
 import { DrawBoard } from "./draw-board";
 import {
+  colorToCss,
   connectionIdToColor,
   findIntersectingLayersWithReactangle,
   penPointsToPathLayer,
@@ -42,6 +44,7 @@ import { SelectionTools } from "./selection-tools";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Hint } from "@/components/hint";
 import { cursorTo } from "readline";
+import { Path } from "./layer-path";
 
 const MAX_LAYERS = 100;
 
@@ -50,12 +53,15 @@ interface CanvasProps {
 }
 
 export const Canvas = ({ boardId }: CanvasProps) => {
-  // Controls to zoom-in and out
 
   // This is for the Layers that are to be put in
   const layerIds = useStorage((root) => root.layerIds);
 
   // The layerIds are going to be information regarding the actions that we are going to perform on the canvas and it also determines the layerType thus helping us to know whether to show rectangle, square, ellipse or a path.
+
+  // For my pencil movement to be seen
+  const pencilDraft = useSelf((me) => me.presence.pencilDraft);
+
 
   // This is for the Canvas State inside the board and to justify if some data is present or not
   const [canvasState, setCanvasState] = useState<CanvasState>({
@@ -513,6 +519,14 @@ setCanvasState({mode: CanvasMode.Pencil});
               />
             )}
           <CursorPresence />
+          {pencilDraft != null && pencilDraft.length > 0 &&(
+            <Path
+            points= {pencilDraft}
+            fill={colorToCss(lastUsedColor)}
+            x={0}
+            y={0}
+            />
+          )}
         </g>
       </svg>
     </main>
