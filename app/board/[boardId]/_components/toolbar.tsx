@@ -129,13 +129,13 @@ export const Toolbar = ({
       <div className="bg-white rounded-md p-1.5 flex gap-y-3 flex-col items-center shadow-md dark:text-white dark:bg-slate-900">
         {/* The Undo and Redo will only be active once we have some history on the board or else it won't be working */}
         <ToolButton
-          label="Undo"
+          label="Undo - Ctrl + z"
           icon={Undo2}
           onClick={undo}
           isDisabled={!canUndo}
         />
         <ToolButton
-          label="Redo"
+          label="Redo - Ctrl + y"
           icon={Redo2}
           onClick={redo}
           isDisabled={!canRedo}
