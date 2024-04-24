@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Collab Board
 
-First, run the development server:
+This is in-time live collaborative board that can be used for Idea designing and other collaborative activities such as brainstroming and wireframing. 
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+- Light/dark mode toggle
+- Live Collaboration using LiveBlocks
+- User Authentication using Clerk
+- Completely Responsive
+- Organisation Creation and Role Assignment to each user
+- Can make a board Favourite/ UnFavourite
+- Real Time User Movement on the Board
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Screenshots
 
-## Deploy on Vercel
+    1. User Sign in Using Clerk
+![Screenshot_20240424_072805](https://github.com/shivam-jha2712/PortFolio-2.0/assets/71783722/3353293a-abd2-428f-8c3d-61af52b20c07)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    2. Home Screen Image (Light Mode)
+![Screenshot_20240424_064227](https://github.com/shivam-jha2712/PortFolio-2.0/assets/71783722/a2004310-7a47-4074-aaee-8db0d4abdaee)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+    3. Home Screen Image (Dark Mode)
+![Screenshot_20240424_064243](https://github.com/shivam-jha2712/PortFolio-2.0/assets/71783722/f074d387-611a-4aca-be70-61f64168b21f)
+    
+    4. Favourite Boards
+![Screenshot_20240424_071308](https://github.com/shivam-jha2712/PortFolio-2.0/assets/71783722/74e9ef70-8eb5-48d1-99d0-d69d61d16e00)
+
+    5. Role Assignment and Organisation Creation
+![Screenshot_20240424_070841](https://github.com/shivam-jha2712/PortFolio-2.0/assets/71783722/2d01ed70-b99b-4316-9978-0c91550683c6)
+
+    6. Blank Canvas Board
+![Screenshot_20240424_064250](https://github.com/shivam-jha2712/PortFolio-2.0/assets/71783722/4455c1d4-0610-48f5-bbd9-56ec2763572c)
+
+    7. Pen Movement on Canvas Board
+![Screenshot_20240424_064304](https://github.com/shivam-jha2712/PortFolio-2.0/assets/71783722/68a2a112-f19f-4953-b80b-cf074317deaf)
+
+    8. Color Palette, Layer Option and Deletion for Canvas Board
+![Screenshot_20240424_064320](https://github.com/shivam-jha2712/PortFolio-2.0/assets/71783722/b10343f7-1f9c-49fc-9fc8-ba0353d29dd7)
+
+    9. Real Time Collaboration Visualisation
+![Screenshot_20240424_074121](https://github.com/shivam-jha2712/PortFolio-2.0/assets/71783722/8666f327-9a4b-441c-a6f3-690219c93785)
+
+    
+
+
+
+    
+
+## Documentation
+
+The project mainly constitutes of tech stack of Typescript, [Next.js](https://nextjs.org/) for frontend/ client side application. [Convex](https://www.convex.dev/) for Backend and [LiveBlocks](https://liveblocks.io/) for realtime application of people in the working. 
+
+
+Along with these I have also used [Clerk](https://clerk.com/) for user authentication and [ShadCn](https://ui.shadcn.com/docs/dark-mode/next) for UI components.
+
+The detailed Documentation regarding the complete walk through of the project has been mentioned in the link below. It is a work in progress thereby, it is still being updated
+
+
+
+[Read More....](https://www.notion.so/Collab-Board-Project-bc95b3697f7e4ba2988217e87036ab68)
+
+
+## Demo
+
+You would be needed to signin either via Google or Github to use the application. As the project uses clerk for user management.
+
+https://collab-board-project.vercel.app/
