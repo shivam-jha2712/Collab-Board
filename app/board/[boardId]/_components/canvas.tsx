@@ -320,6 +320,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
           x: prevCamera.x - e.deltaX,
           y: prevCamera.y - e.deltaY,
           scale: prevCamera.scale,
+          // scale: 1,
         }));
       }
     },
