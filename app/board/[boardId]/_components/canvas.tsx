@@ -578,9 +578,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       {/*
 // This is just for the sake of keeping colors upfront and not being selected on tool selection and this is from color-picker-2
 */}
-      <div className="absolute top-[85%] -translate-y-[50%] left-5 flex flex-col gap-y-4 dark:text-black">
         <ColorPicker onChange={setFill} />
-      </div>
+      {/* <div className="absolute top-[93%] -translate-y-[50%] -translate-x-[-25%]
+      flex flex-col items-center justify-center gap-y-4 dark:text-black">
+      </div> */}
 
       <Hint label="Switch Theme">
         <div className="fixed z-10 bottom-2 left-2 flex items-center justify-center">
