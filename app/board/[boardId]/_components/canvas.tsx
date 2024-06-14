@@ -54,6 +54,13 @@ interface CanvasProps {
   boardId: string;
 }
 
+// Adjust the pointer event to consider the camera scale
+const adjustPointToCameraScale = (point: Point, scale: number): Point => ({
+  x: point.x / scale,
+  y: point.y / scale,
+});
+
+
 export const Canvas = ({ boardId }: CanvasProps) => {
   // This is for the Layers that are to be put in
   const layerIds = useStorage((root) => root.layerIds);
@@ -207,17 +214,19 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         return;
       }
 
+      const adjustedPoint = adjustPointToCameraScale(point, camera.scale);
+
       setMyPresence({
         cursor: point,
         pencilDraft:
           pencilDraft.length === 1 &&
-          pencilDraft[0][0] === point.x &&
-          pencilDraft[0][1] === point.y
+          pencilDraft[0][0] === adjustedPoint.x &&
+          pencilDraft[0][1] === adjustedPoint.y
             ? pencilDraft
-            : [...pencilDraft, [point.x, point.y, e.pressure]],
+            : [...pencilDraft, [adjustedPoint.x, adjustedPoint.y, e.pressure]],
       });
     },
-    [canvasState.mode]
+    [canvasState.mode, camera.scale]
   );
 
   // This is for the inserting of the drawn path by the pointer from starting till it has been up
@@ -253,12 +262,13 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   // function for Starting the drawing
   const startDrawing = useMutation(
     ({ setMyPresence }, point: Point, pressure: number) => {
+      const adjustedPoint = adjustPointToCameraScale(point, camera.scale);
       setMyPresence({
-        pencilDraft: [[point.x, point.y, pressure]],
+        pencilDraft: [[adjustedPoint.x, adjustedPoint.y, pressure]],
         penColor: lastUsedColor,
       });
     },
-    [lastUsedColor]
+    [lastUsedColor, camera.scale]
   );
 
   // Function for resizing the layer
@@ -333,6 +343,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       e.preventDefault();
 
       const current = pointerEventToCanvasPoint(e, camera);
+
+      // const current = adjustPointToCameraScale(pointerEventToCanvasPoint(e, camera), camera.scale);
+
       // Now the thing is that the current needs to be calculated by the pointer event, and the state of the camera and state of the canvas as well
 
       // This is now for selection of range of layers all at once
@@ -374,6 +387,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       const point = pointerEventToCanvasPoint(e, camera);
+      // const point = adjustPointToCameraScale(pointerEventToCanvasPoint(e, camera), camera.scale);
 
       if (canvasState.mode === CanvasMode.Inserting) {
         return;
@@ -400,7 +414,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
   const onPointerUp = useMutation(
     ({}, e) => {
-      const point = pointerEventToCanvasPoint(e, camera);
+      // const point = pointerEventToCanvasPoint(e, camera);
+      const point = adjustPointToCameraScale(pointerEventToCanvasPoint(e, camera), camera.scale);
+
 
       // This is the supporting logic for deselcting a particular component
       if (
@@ -457,7 +473,9 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       history.pause();
       e.stopPropagation();
 
-      const point = pointerEventToCanvasPoint(e, camera);
+      // const point = pointerEventToCanvasPoint(e, camera);
+      const point = adjustPointToCameraScale(pointerEventToCanvasPoint(e, camera), camera.scale);
+
 
       if (!self.presence.selection.includes(layerId)) {
         setMyPresence({ selection: [layerId] }, { addToHistory: true });
