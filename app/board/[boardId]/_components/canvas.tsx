@@ -345,16 +345,21 @@ export const Canvas = ({ boardId }: CanvasProps) => {
 
       const current = pointerEventToCanvasPoint(e, camera);
 
-      // const current = adjustPointToCameraScale(pointerEventToCanvasPoint(e, camera), camera.scale);
+      const current_1 = adjustPointToCameraScale(pointerEventToCanvasPoint(e, camera), camera.scale);
 
       // Now the thing is that the current needs to be calculated by the pointer event, and the state of the camera and state of the canvas as well
 
       // This is now for selection of range of layers all at once
       if (canvasState.mode === CanvasMode.Pressing) {
-        startMultiSelection(current, canvasState.origin);
+        startMultiSelection(current_1, canvasState.origin);
       } else if (canvasState.mode === CanvasMode.SelectionNet) {
-        updateSelectionNet(current, canvasState.origin);
+        updateSelectionNet(current_1, canvasState.origin);
       }
+      // if (canvasState.mode === CanvasMode.Pressing) {
+      //   startMultiSelection(current, canvasState.origin);
+      // } else if (canvasState.mode === CanvasMode.SelectionNet) {
+      //   updateSelectionNet(current, canvasState.origin);
+      // }
 
       // Now we would work for translating which means the movement on selection and dragging
       else if (canvasState.mode === CanvasMode.Translating) {
