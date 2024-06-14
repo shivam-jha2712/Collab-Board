@@ -47,6 +47,8 @@ import { cursorTo } from "readline";
 import { Path } from "./layer-path";
 import { useDisableScrollBounce } from "@/hooks/use-disable-scroll-bounce";
 import { useDeleteLayers } from "@/hooks/use-delete-layers";
+// This is just for the sake of keeping colors upfront and not being selected on tool selection
+import { ColorPicker } from "./color-picker-2";
 
 const MAX_LAYERS = 1000;
 
@@ -59,7 +61,6 @@ const adjustPointToCameraScale = (point: Point, scale: number): Point => ({
   x: point.x / scale,
   y: point.y / scale,
 });
-
 
 export const Canvas = ({ boardId }: CanvasProps) => {
   // This is for the Layers that are to be put in
@@ -415,8 +416,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
   const onPointerUp = useMutation(
     ({}, e) => {
       // const point = pointerEventToCanvasPoint(e, camera);
-      const point = adjustPointToCameraScale(pointerEventToCanvasPoint(e, camera), camera.scale);
-
+      const point = adjustPointToCameraScale(
+        pointerEventToCanvasPoint(e, camera),
+        camera.scale
+      );
 
       // This is the supporting logic for deselcting a particular component
       if (
@@ -474,8 +477,10 @@ export const Canvas = ({ boardId }: CanvasProps) => {
       e.stopPropagation();
 
       // const point = pointerEventToCanvasPoint(e, camera);
-      const point = adjustPointToCameraScale(pointerEventToCanvasPoint(e, camera), camera.scale);
-
+      const point = adjustPointToCameraScale(
+        pointerEventToCanvasPoint(e, camera),
+        camera.scale
+      );
 
       if (!self.presence.selection.includes(layerId)) {
         setMyPresence({ selection: [layerId] }, { addToHistory: true });
@@ -542,6 +547,20 @@ export const Canvas = ({ boardId }: CanvasProps) => {
     };
   }, [deleteLayers, history]);
 
+  const selection = useSelf((me) => me.presence.selection);
+  // This is for color selection for the given data
+  const setFill = useMutation(
+    ({ storage }, fill: Color) => {
+      const liveLayers = storage.get("layers");
+      setLastUsedColor(fill);
+
+      selection.forEach((id) => {
+        liveLayers.get(id)?.set("fill", fill);
+      });
+    },
+    [selection, setLastUsedColor]
+  );
+
   return (
     // Board Color : TODO : Create dots in the background as grid
     <main className="h-full w-full relative touch-none">
@@ -555,6 +574,14 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         undo={history.undo}
         redo={history.redo}
       />
+
+      {/*
+// This is just for the sake of keeping colors upfront and not being selected on tool selection and this is from color-picker-2
+*/}
+      <div className="absolute top-[85%] -translate-y-[50%] left-5 flex flex-col gap-y-4 dark:text-black">
+        <ColorPicker onChange={setFill} />
+      </div>
+
       <Hint label="Switch Theme">
         <div className="fixed z-10 bottom-2 left-2 flex items-center justify-center">
           <ModeToggle />
