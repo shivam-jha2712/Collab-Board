@@ -319,7 +319,7 @@ export const Canvas = ({ boardId }: CanvasProps) => {
         setCamera((prevCamera) => ({
           x: prevCamera.x - e.deltaX,
           y: prevCamera.y - e.deltaY,
-          scale: 1,
+          scale: prevCamera.scale,
         }));
       }
     },
