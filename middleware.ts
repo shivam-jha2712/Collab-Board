@@ -22,9 +22,10 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // 1. Define routes that should be PUBLIC (accessible to everyone)
 // Make sure to include your sign-in/sign-up pages here!
 const isPublicRoute = createRouteMatcher([
+  '/anyone-can-visit-this-route', // Matches your old "publicRoutes"
+  '/no-auth-in-this-route',        // Matches your old "ignoredRoutes"
   '/sign-in(.*)', 
-  '/sign-up(.*)',
-  '/' // Add this if you want the home page to be public
+  '/sign-up(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
