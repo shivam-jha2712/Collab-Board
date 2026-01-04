@@ -1,5 +1,5 @@
 // This is similar to creating client side pages but instead of page for auth we use route.tsx
-import { auth, currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { Liveblocks } from "@liveblocks/node";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
