@@ -6,6 +6,7 @@ import { Plus } from "lucide-react"; // Importing Plus icon from Lucide-React li
 import { api } from "@/convex/_generated/api"; // Importing the API endpoint from the Convex generated files
 import { useApiMutation } from "@/hooks/use-api-mutation"; // Importing custom hook for handling API mutations
 import { useRouter } from "next/navigation";
+import { useProModal } from "@/store/use-pro-modals";
 
 interface NewBoardButtonProps {
   orgId: string;
@@ -23,6 +24,7 @@ export const NewBoardButton = ({
   disabled,
 }: NewBoardButtonProps): JSX.Element => {
   const router = useRouter();
+  const { onOpen } = useProModal(); // destructured onOpen function from useProModal hook
   // Using the useApiMutation hook for handling API mutations
   const { mutate, pending } = useApiMutation(api.board.create);
 
@@ -36,7 +38,13 @@ export const NewBoardButton = ({
         toast.success("Board Created Successfully!"); // Displaying success message on board creation
         router.push(`/board/${id}`);
       })
-      .catch(() => toast.error("Failed to create board!")); // Displaying error message on failure
+      .catch(() => 
+      {
+
+        toast.error("Failed to create board!")
+        onOpen();
+      }); // Displaying error message on failure along with the promodal showing up
+    
   };
 
   return (

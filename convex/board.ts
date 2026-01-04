@@ -3,6 +3,9 @@
 import { v } from "convex/values"; // Importing v function from Convex for defining argument types
 import { mutation, query } from "./_generated/server"; // Importing generated mutation from server module
 
+const ORG_BOARD_LIMIT= 2;
+
+
 // Array of placeholder image URLs
 const images = [
   "/placeholders/1.svg",
@@ -18,7 +21,6 @@ const images = [
 ];
 
 
-const FREE_PLAN_LIMIT = 5;
 
 /**
  * 1.  create mutation to create a new board.
@@ -43,6 +45,18 @@ export const create = mutation({
 
     // Select a random image URL from the array
     const randomImage = images[Math.floor(Math.random() * images.length)];
+
+// Before inserting a new board check for the limit counter and also if it is a free or a paid tier
+    const existingBoard = await ctx.db
+      .query("boards")
+      .withIndex("by_org",(q) => q.eq("orgId", args.orgId))
+      .collect();
+// It runs a query on the database to check the number of boards that are already present in the database and the query is based on the orgId. 
+
+    if(existingBoard.length >= ORG_BOARD_LIMIT){
+      throw new Error("Board Limit reached");
+    }
+
 
     // Insert a new board into the database
     const board = await ctx.db.insert("boards", {

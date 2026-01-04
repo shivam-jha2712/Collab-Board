@@ -8,6 +8,7 @@ import { useOrganization } from "@clerk/nextjs"; // Importing useOrganization ho
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useProModal } from "@/store/use-pro-modals";
 
 /**
  * EmptyBoards component represents the UI when there are no boards present.
@@ -16,6 +17,7 @@ import { useRouter } from "next/navigation";
 export const EmptyBoards = () => {
 
   const router = useRouter();
+  const proModal = useProModal();
 
   // Retrieving organization data using the useOrganization hook
   const { organization } = useOrganization();
